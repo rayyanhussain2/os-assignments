@@ -33,7 +33,9 @@ int nOption(int argc, char** argv);
 
 int dOption(int argc, char** argv);
 
-int main(int argc, char* argv[]){
+int word(int argc, char* argv[]);
+
+int word(int argc, char* argv[]){
 
     //Test code
     /*
