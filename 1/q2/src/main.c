@@ -2,20 +2,26 @@
     #include <stdlib.h>
     #include <stdbool.h>
     #include <string.h>
-    #include "word.c"
     #include <string.h>
+    #include <unistd.h>
+    #include <limits.h>
+
+    #include "../include/word.h"
 
     #define maxarglen 256
     #define maxargc 11
 
     int main(){
         short prevStatus = 100;
-        char cwd[] = "[~]% ";
+        char cwd[maxarglen * maxargc];
 
 
         char currCMD[maxarglen * maxargc];
         while(true){
+            getcwd(cwd, sizeof(cwd));
+            fputs("[", stdout);
             fputs(cwd, stdout);
+            fputs("]% ", stdout);
             fgets(currCMD, maxarglen * maxargc, stdin);
 
             char* currArg;
