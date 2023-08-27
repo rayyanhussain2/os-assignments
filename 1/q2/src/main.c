@@ -47,6 +47,8 @@
             //internal commands
             if(strcmp(argv[0], "word") == 0){
                 word(argc, argv);
+            }else if(strcmp(argv[0], "exit") == 0){
+                exit(0);
             }else{
                 int pid = fork();
                 if(pid == 0){
