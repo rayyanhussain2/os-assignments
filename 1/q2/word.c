@@ -33,6 +33,8 @@ int nOption(int argc, char** argv);
 
 int dOption(int argc, char** argv);
 
+int noOption(int argc, char** argv);
+
 int word(int argc, char* argv[]);
 
 int word(int argc, char* argv[]){
@@ -75,7 +77,11 @@ int word(int argc, char* argv[]){
             }
         }else{
             //no option passed, read the one and only file
-
+            if(argc > 2){
+                fputs("Error: Insufficient arguments\n", stderr);
+                return 2;
+            }
+            return noOption(argc, argv);            
         }
 
     }
@@ -128,6 +134,7 @@ int nOption(int argc, char** argv){
     }else{
         printf("Word count: %lli\n", wCountFunc(pFile, true));
         fclose(pFile);
+        return 0;
     } 
 }
 
@@ -144,5 +151,18 @@ int dOption(int argc, char** argv){
         printf("Word count delta: %lli\n", abs(wCountFunc(pFile, false) - wCountFunc(pFile2, false)));
         fclose(pFile);
         fclose(pFile2);
+        return 0;
+    }
+}
+
+int noOption(int argc, char** argv){
+    FILE* pFile = fopen(*(argv+1), "r");
+    if(pFile == NULL){
+        perror(*(argv+1));
+        return 1;
+    }else{
+        printf("Word count: %lli\n", wCountFunc(pFile, false));
+        fclose(pFile);
+        return 0;
     }
 }

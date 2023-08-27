@@ -1,3 +1,4 @@
 install:
-	gcc word.c -o word
-	sudo mv word /usr/local/bin
+	gcc shell.c -o shell
+	gcc dir.c -o dir
+	sudo mv dir /usr/local/bin
