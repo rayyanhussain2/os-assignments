@@ -1,0 +1,37 @@
+#!/bin/bash
+mkdir -p Result
+output_file="Result/output.txt"
+while IFS= read -r line || [[ -n "$line" ]]; do
+
+    read n1 n2 op <<< "$line"
+    n1=$((n1))
+    n2=$((n2))
+    
+    case "$op" in
+        "xor")
+            result=$((n1 ^ n2))
+            ;;
+        "product")
+            result=$((n1 * n2))
+            ;;
+        "compare")
+            if [ "$n1" -gt "$n2" ]; then
+                result="$n1"
+            else
+                result="$n2"
+            fi
+            ;;
+        *)
+            echo "Invalid format of string"
+            continue
+            ;;
+    esac  
+    output_line="result $op $n1 $n2 : $result"
+    echo "$output_line" >> "$output_file"
+
+done < input.txt
+
+echo "Calculation completed. Results saved in $output_file."
+
+
+

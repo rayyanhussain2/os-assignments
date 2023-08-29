@@ -1,0 +1,8 @@
+Result of compare 53 -21: 53
+Result of xor -21 32: -53
+Result of product 32 -12: -384
+Result of compare 32 33: 33
+result compare 53 -21 : 53
+result xor -21 32 : -53
+result product 32 -12 : -384
+result compare 32 33 : 33
