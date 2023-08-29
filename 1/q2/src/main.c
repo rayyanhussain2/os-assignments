@@ -27,16 +27,26 @@
             char* currArg;
             char* argv[maxargc];
             short argc = 0;
+            char seekChar;
+            short currindex = 0;
 
             while(argc < 11){
-                if(argc > 0)
-                    currArg = strtok(NULL, " ");
+                if(argc > 0){
+                    /*
+                    if(currArg[currindex] == "\""){
+
+                    }
+                    currArg = strtok(NULL, "\"");
+                    */
+                   currArg = strtok(NULL, " ");
+                }
                 else
                     currArg = strtok(currCMD, " ");
 
                 if(currArg != NULL){
                     argv[argc] = currArg;
                     argc += 1;
+                    currindex += strlen(currArg);
                 }else{
                     break;
                 }
@@ -49,7 +59,61 @@
                 word(argc, argv);
             }else if(strcmp(argv[0], "exit") == 0){
                 exit(0);
-            }else{
+            }
+            
+            
+            //special external commands
+            else if(strcmp(argv[0], "dir") == 0){
+                int childStatus;
+                int pid = fork();
+                if(pid == 0){
+                    if(argc == 1)
+                        execl("bin/dir", "bin/dir", NULL);
+                    else if(argc == 2)
+                        execl("bin/dir", "bin/dir", *(argv+1), NULL);
+                    else if(argc == 3)
+                        execl("bin/dir", "bin/dir", *(argv+1), *(argv+2), NULL);
+                    else
+                        execl("bin/dir", "bin/dir", *(argv+1), "fsdafd", "fadsa", NULL);
+                }else if(pid > 0){
+                    waitpid(pid, &childStatus ,0);
+                    if(childStatus == 0){
+                        if(argc == 2)
+                            chdir(*(argv+1));
+                        else if(argc == 3)
+                            chdir(*(argv + 2));
+                    }
+                }else{
+                    perror("Error: ");
+                    return 3;
+                }
+            }   
+
+            //special external commands
+            else if(strcmp(argv[0], "date") == 0){
+                int childStatus;
+                int pid = fork();
+                if(pid == 0){
+                    if(argc == 1)
+                        execl("bin/date", "bin/date", NULL);
+                    else if(argc == 2)
+                        execl("bin/date", "bin/date", *(argv+1), NULL);
+                    else if(argc == 3)
+                        execl("bin/date", "bin/date", *(argv+1), *(argv+2), NULL);
+                    else if(argc == 4)
+                        execl("bin/date", "bin/date", *(argv+1), *(argv+2), *(argv + 3), NULL);
+                    else
+                        execl("bin/date", "bin/date", *(argv+1), "fsdafd", "fadsa", NULL);
+                }else if(pid > 0){
+                    wait(NULL);
+                }else{
+                    perror("Error: ");
+                    return 3;
+                }
+            }   
+            
+            //any other ext command.
+            else{
                 int pid = fork();
                 if(pid == 0){
                     int status = execvp(*(argv+0), argv );
