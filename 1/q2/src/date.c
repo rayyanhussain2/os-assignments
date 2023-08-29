@@ -102,7 +102,7 @@ int printD(long timestamp, char* STRING){
         time -> tm_year -= 1;
     }else if(strcmp(STRING, "\"today\"") == 0){
     }else{
-        fputs("Error: Unkown relative time string.", stderr);
+        fputs("Error: Unkown relative time string.\n", stderr);
         return 2;
     }
     
