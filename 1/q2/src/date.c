@@ -69,44 +69,54 @@ int printD(long timestamp, char* STRING){
         time-> tm_mday -= 1;
         time-> tm_wday -= 1;
         time-> tm_yday -= 1;
+        isCustom = 0;
     }else if(strcmp(STRING, "\"tomorrow\"") == 0){
         time-> tm_mday += 1;
         time-> tm_wday += 1;
         time-> tm_yday += 1;
+        isCustom = 0;
     }else if (strcmp(STRING, "\"in_a_minute\"") == 0){
         time -> tm_min += 1;
-
+        isCustom = 0;
     }else if(strcmp(STRING, "\"in_an_hour\"") == 0){
         time -> tm_hour += 1;
-
+        isCustom = 0;
     }else if(strcmp(STRING, "\"in_a_day\"") == 0){
         time-> tm_mday += 1;
         time-> tm_wday += 1;
         time-> tm_yday += 1;
+        isCustom = 0;
     }else if(strcmp(STRING, "\"in_a_month\"") == 0){
         time-> tm_mon += 1;
+        isCustom = 0;
     }else if(strcmp(STRING, "\"in_a_year\"") == 0){
         time-> tm_year += 1;
+        isCustom = 0;
     }else if(strcmp(STRING, "\"a_minute_ago\"") == 0){
         time -> tm_min -= 1; 
-
+        isCustom = 0;
     }else if(strcmp(STRING, "\"an_hour_ago\"") == 0){
         time ->tm_hour -= 1;
+        isCustom = 0;
     }else if(strcmp(STRING, "\"a_day_ago\"") == 0){
         time-> tm_mday -= 1;
         time-> tm_wday -= 1;
         time-> tm_yday -= 1;
+        isCustom = 0;
     }else if(strcmp(STRING, "\"a_month_ago\"") == 0){
         time ->tm_mon -= 1;
+        isCustom = 0;
     }else if(strcmp(STRING, "\"a_year_ago\"") == 0){
         time -> tm_year -= 1;
+        isCustom = 0;
     }else if(strcmp(STRING, "\"today\"") == 0){
+        isCustom = 0;
     }else{
-        fputs("Error: Unkown relative time string.\n", stderr);
-        return 2;
+        strftime(&output[0], sizeof(output), STRING, time); 
     }
     
-    strftime(&output[0], sizeof(output), STRING2, time); 
+    if(!isCustom)
+        strftime(&output[0], sizeof(output), STRING2, time); 
     
     fputs(output, stdout);
     fputs("\n", stdout);
