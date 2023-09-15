@@ -5,7 +5,7 @@
 #include<unistd.h>
 #include<sys/wait.h>
 
-int factorial(n){
+int factorial(int n){
     if (n<=1) return 1;
     else return n*factorial(n-1);
 }
@@ -27,7 +27,7 @@ void fibonacci(int n){
 }
 
 int main (int argc,char *argv[]){
-    pid_t PID_of_Child = vfork();
+    pid_t PID_of_Child = fork();
     int result;
     if (PID_of_Child<0){
         fprintf(stderr,"Fork Failed");

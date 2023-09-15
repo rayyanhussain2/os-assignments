@@ -1,5 +1,4 @@
 53 -21 compare 
 -21 32 xor
 32 -12 product
-32 33 compare
-12 11 add
+32 44 compare
