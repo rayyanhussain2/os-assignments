@@ -1,8 +1,8 @@
 all: Counter Process
 Counter : Counter.c
-	gcc -o Counter Counter.c
+	gcc Counter.c -o Counter -lm
 Process : main.c
-	gcc -o main.c Process
+	gcc main.c -o Process -lm
 
 .PHONY: clean
 clean:
