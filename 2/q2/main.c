@@ -3,7 +3,9 @@
 #include <time.h>
 #include <sys/wait.h> 
 #include <sched.h>
-void child_process(int num){
+#include <unistd.h>
+
+void child_process(int num, int sched_policy){
     int status;
     struct timespec start, end;
     clock_gettime(CLOCK_MONOTONIC,&start);
@@ -12,6 +14,8 @@ void child_process(int num){
         perror("Forking unsucessful");
     }
     else if (child_pid==0){
+        struct sched_param p = {.sched_priority =0};
+        sched_setscheduler(0,sched_policy,&p);
         execl("./Counter.c","./Counter.c",(char *)0);
     }
     else{
@@ -22,17 +26,10 @@ void child_process(int num){
     }
 }
 int main(){
-    struct sched_param p1 = {.sched_priority =0};
-    sched_setscheduler(0,SCHED_OTHER,&p1);
-    child_process(1);
 
-    struct sched_param p2 = {.sched_priority =0};
-    sched_setscheduler(0,SCHED_RR,&p2);
-    child_process(2);
-
-    struct sched_param p3 = {.sched_priority =0};
-    sched_setscheduler(0,SCHED_FIFO,&p3);
-    child_process(3);   
+    child_process(1,SCHED_OTHER);
+    child_process(2,SCHED_RR);
+    child_process(3,SCHED_FIFO);   
 
     return 0;
 }
