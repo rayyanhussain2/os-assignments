@@ -1,9 +1,5 @@
 #include <linux/init.h>
 #include <linux/module.h>
-#include <linux/uaacess.h>
-#include <linux/fs.h>
-#include <linux/proc_fs.h>
-#include <linux/kernel.h>
 #include <linux/sched/signal.h>
 
 //metadata
@@ -17,7 +13,7 @@ static int __init processCounterInit(void){
     int counter = 0;
 
     for_each_process(currProcess){
-        if(currProcess -> state == 0){
+        if(currProcess -> __state == 0){
             counter += 1;
         }
     }
@@ -26,9 +22,8 @@ static int __init processCounterInit(void){
     return 0;
 }
 
-static int __init processCounterExit(void){
+static void __exit processCounterExit(void){
     printk("Exiting Process Counter module.\n");
-    return 0;
 }
 
 module_init(processCounterInit);
