@@ -4,7 +4,7 @@
 
 //metadata
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Rayyan_Hussain");
+MODULE_AUTHOR("Rayyan_Hussain and Mehul_Agarwal");
 
 static int __init processCounterInit(void){
     printk("Process Counter module loaded.\n");
