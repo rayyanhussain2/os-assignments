@@ -5,10 +5,11 @@ line = fp.readline()
 main_list =[]
 while line:
     line = line.rstrip()
-    main_list.append(line)
+    main_list.append(float(line))
     line = fp.readline()
 plt.bar(process_names,main_list,color=["blue","green","red"])
 plt.xlabel("Processes")
 plt.ylabel("Execution time (in Seconds)")
+plt.ylim(0, 9)
 plt.title('Execution time for different scheduling Policies')
 plt.show()
