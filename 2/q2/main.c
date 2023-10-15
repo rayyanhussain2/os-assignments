@@ -5,53 +5,73 @@
 #include <sched.h>
 #include <unistd.h>
 
-double process_sched(int num, int sched_policy, int priority) {
-    int status;
-    struct timespec start, end;
-    clock_gettime(CLOCK_MONOTONIC, &start);
-
-    pid_t child_pid = fork();
-    if (child_pid < 0) {
-        perror("Forking unsuccessful");
-    } else if (child_pid == 0) {
-        struct sched_param p = {.sched_priority = priority};
-        if (sched_setscheduler(0, sched_policy, &p) != 0) {
-            perror("Error setting scheduling policy");
-            exit(EXIT_FAILURE);
-        }
-
-        execl("./Counter", "./Counter", NULL);
-        perror("Error in executing Counter");
-        exit(EXIT_FAILURE);
-    } else {
-        waitpid(child_pid, &status, 0);
-        clock_gettime(CLOCK_MONOTONIC, &end);
-        double del_time = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
-        if (num==1){
-            del_time+=1;
-        }
-        else if (num==3){
-            del_time-=1;
-        }
-        printf("Process %d execution time: %f seconds\n", num, del_time);
-        return del_time;
-    }
-}
-
-int main() {
+int main(){
     FILE *fp;
     fp = fopen("output.txt", "w");
     if (fp == NULL) {
         perror("Error opening output.txt");
         exit(EXIT_FAILURE);
     }
-    double time1=process_sched(1,SCHED_OTHER ,0);
-    double time2=process_sched(2, SCHED_RR, 99);
-    double time3=process_sched(3, SCHED_FIFO, 99);
-    fprintf(fp,"%f\n",time1);
-    fprintf(fp,"%f\n",time2);
-    fprintf(fp,"%f",time3);
+    pid_t pids[3];
+    char *policy_str[] = {"SCHED OTHER","SCHED RR","SCHED FIFO"};
+    struct timespec start[3];
+    for(int i=0;i<3;i++){
+        
+        pids[i] = fork();
+        clock_gettime(CLOCK_MONOTONIC, &start[i]);
+        if (pids[i]<0){
+            perror("Forking Unsuccessful");
+        }
+        else if (pids[i]==0){
+            struct sched_param p;
+            int sched_policy;
+            if (i==0){
+                p.sched_priority =0;
+                sched_policy = SCHED_OTHER;
+            }
+            else if (i==1){
+                p.sched_priority =1;
+                sched_policy = SCHED_RR;
+            }
+            else if (i==2){
+                p.sched_priority =1;
+                sched_policy = SCHED_FIFO;
+            }
+            int sched_check = sched_setscheduler(0,sched_policy,&p);
+            if (sched_check == -1){
+                perror("Scheduler error");
+                exit(1);
+            }
+            execl("./Counter", "./Counter", NULL);
+            perror("Error in executing Counter");
+            exit(1);
+        }
+    }
+    int counter =0;
+    while(counter<3) {
+        int status;
+        pid_t process_pid = waitpid(-1, &status, WNOHANG);
+
+        if(process_pid>0){
+            int process_no =-1;
+            for (int j=0;j<3;j++){
+                if (process_pid == pids[j]){
+                    process_no = j+1;
+                    break;
+                }
+            }
+
+
+            if (process_no != -1){
+                struct timespec end;
+                clock_gettime(CLOCK_MONOTONIC, &end);
+                double del_time = (end.tv_sec - start[process_no-1].tv_sec) + (end.tv_nsec - start[process_no-1].tv_nsec) / 1e9;
+                fprintf(fp,"%f\n",del_time);
+                printf("Process %d with scheduling policy %s with execution time: %f seconds\n", process_no,policy_str[process_no-1] ,del_time);
+                counter++;
+            }
+        }
+    }
     fclose(fp);
     return 0;
 }
-
