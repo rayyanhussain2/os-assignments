@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-process_names = ["SCHED OTHERS","SCHED RR","SCHED FIFO"]
+process_names = ["SCHED FIFO","SCHED RR","SCHED OTHERS",]
 fp = open("output.txt","r")
 line = fp.readline()
 main_list =[]
@@ -10,6 +10,6 @@ while line:
 plt.bar(process_names,main_list,color=["blue","green","red"])
 plt.xlabel("Processes")
 plt.ylabel("Execution time (in Seconds)")
-plt.ylim(0, 9)
+plt.ylim(0, 40)
 plt.title('Execution time for different scheduling Policies')
 plt.show()
