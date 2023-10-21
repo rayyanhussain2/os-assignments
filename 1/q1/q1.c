@@ -5,6 +5,13 @@
 #include<unistd.h>
 #include<sys/wait.h>
 
+// OS MEI NAHI POST KAR SAKTE GITHUB PE ASSIGNMENTS THROUGHOUT THE COURSE
+// PLAG KA PART HAI, PRIVATE KARDE BBDOLL
+
+
+
+
+
 int main (int argc,char *argv[]){
     pid_t PID_of_Child = fork();
     if (PID_of_Child<0){
