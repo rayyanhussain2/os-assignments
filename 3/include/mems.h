@@ -203,18 +203,19 @@ Parameter: Nothing
 Returns: Nothing but should print the necessary information on STDOUT
 */
 void mems_print_stats(){
+    long long mPhys = 0;
+    printf("\n----- MeMS SYSTEM STATS -----\n");
     long totalAllocatedSize = 0;
     long totalFreeSize = 0;
+    long totalPages = 0;
     int i = 0, j = 0;
 
     struct node* pHeadIter = pHead -> pNext;
+    struct node* pSubNode;
     while(pHeadIter != NULL){
         totalAllocatedSize += pHeadIter ->size;
-        printf("\nMain Node %d: ", ++i);
-        printf("%ld Page(s)\n", pHeadIter -> size/PAGE_SIZE);
-        printf("-----------\n");
-
-        struct node* pSubNode = pHeadIter -> pSubChain;
+        printf("MAIN[%lld:%lld]-> ", mPhys, mPhys + (pHeadIter -> size) - 1);
+        pSubNode = pHeadIter -> pSubChain;
         j = 0;
         while(pSubNode != NULL){
             if(pSubNode -> isHole){
@@ -222,18 +223,41 @@ void mems_print_stats(){
             }  
             
             if(pSubNode -> isHole){
-                printf("Chain %d Node %d - Type: Hole, Size: %li byte(s)\n", i, ++j , pSubNode -> size);
+                printf("H[%lld:%lld] <-> ", mPhys, mPhys + ((pSubNode -> size) - 1));
             }else{
-                printf("Chain %d Node %d - Type: Process, Size: %li byte(s)\n", i, ++j , pSubNode -> size);
+                printf("P[%lld:%lld] <-> ", mPhys, mPhys + ((pSubNode -> size) - 1));
             }
+            mPhys += pSubNode -> size;
             pSubNode = pSubNode -> pNext;
         }
+        printf("NULL\n");
+
+        //other important stuff about the main node
+        totalPages += pHeadIter -> size/PAGE_SIZE;
+        pHeadIter = pHeadIter -> pNext;
+        i += 1;
+    }
+    printf("Pages used: %ld\n", totalPages);
+    printf("Space unused: %li\n", totalFreeSize);
+    printf("Main Chain Length: %d\n", i);
+    printf("Sub-Chain Length array: [");
+    //loop in to check 
+    pHeadIter = pHead -> pNext;
+    while(pHeadIter != NULL){
+        j = 0;
+        pSubNode = pHeadIter -> pSubChain;
+        while(pSubNode != NULL){
+            j += 1;
+            pSubNode = pSubNode -> pNext;
+        }
+        if(pHeadIter -> pNext != NULL)
+            printf("%d, ", j);
+        else
+            printf("%d", j);
         pHeadIter = pHeadIter -> pNext;
     }
-
-    printf("\nTotal Pages allocated: %ld\n", totalAllocatedSize/PAGE_SIZE);
-    printf("Total free memory: %li Byte(s)\n", totalFreeSize);
-
+    printf("]\n");
+    
 }
 
 
