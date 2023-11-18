@@ -1,7 +1,8 @@
 {
     "files.associations": {
         "sched.h": "c",
-        "module.h": "c"
+        "module.h": "c",
+        "pthread.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

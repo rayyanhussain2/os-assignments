@@ -4,69 +4,92 @@
 #include <semaphore.h>
 #include <pthread.h>
 
-sem_t mutex; //for filling up one of the queues
+sem_t mutex1; //for filling up one of the queues
+sem_t mutex2;
 sem_t bridge;
+sem_t leftQ;
+sem_t rightQ;
 
 int rightCount = 0;
 int leftCount = 0;
 
-void passing(_Bool isLeft, int id){
+void passing(_Bool isLeft){
     if(isLeft){
-        printf("Car ID: %d passing from the left...\n", id);
+        printf("Car ID: %lld passing from the left...\n", (unsigned long long)pthread_self());
         sleep(1);
-        printf("Car ID: %d passed from the left!\n", id);
+        printf("Car ID: %lld passed from the left!\n", (unsigned long long)pthread_self());
     }else{
-        printf("Car ID: %d passing from the right...\n", id);
+        printf("Car ID: %lld passing from the right...\n", (unsigned long long)pthread_self());
         sleep(1);
-        printf("Car ID: %d passed from the right!\n", id);
+        printf("Car ID: %lld passed from the right!\n", (unsigned long long)pthread_self());
     }
 }
 
+//implement mutual exclusion
 void* right(void* args){
-    //Maybe put mutual exclusion around accessing the bridge and increment counter - Getting deadlocks
-    //A major flaw is that this is not sequential. So we are allowing all the left ones to pass then all the right ones
-    //A situation could be if there were cars on the bridge which were left and there comes a right and a left.
-    //the idea here is to let the 5 cars on the bridge pass, then the right one, then the left one.
-    //but then who enters the queue? the right or the left
-    //If we allow the right one to enter then every time we wake it up, we will have to put it back to sleep
-    //which would again go back to the queue
-    //and if we detect its a left one and wake that one up we just allow it
-    //This is the same logic used here
-    //If we dont put anything waiting and put both of them into the while loop, then theres no point of semaphores.
-    //Maybe use mutex to lock the bridge out of left and right. But then you will again be waiting only for the left or right ones
-
-    while (leftCount != 0){
-
+    //If there are cars on the bridge in the opposite direction, put to sleep
+    //Count is how many cars are there total in queue and on bridge
+    sem_wait(&mutex1);
+    rightCount += 1;
+    if(leftCount > 0){
+        sem_post(&mutex1);
+        sem_wait(&rightQ);
+    }else{
+        sem_post(&mutex1);
     }
 
-    sem_wait(&bridge);      
-    rightCount += 1; 
+    //Let it take on the bridge
+    sem_wait(&bridge);      1
 
-    //cannot put mutex around passing because 5 cars can pass at once. Defeats purpose
-    passing(0, *(int*) args);
+    passing(0);
 
-    sem_post(&bridge);
     rightCount -= 1;
+    sem_post(&bridge);
+
+    //if there are cars left in the queue then you wake them up or else you just leave it as it is
+    if(leftCount > 0 && rightCount == 0){
+        for(int i = 0; i < leftCount; i++){
+            sem_post(&leftQ); // waking up all of them
+        }
+    }
 }
 
 void* left(void* args){
-    while (rightCount != 0) {
+    //If there are cars on the bridge in the opposite direction, put to sleep
+    //Count is h   ow many cars are there total in queue and on bridge
+    sem_wait(&mutex1);
+    leftCount += 1;
+    if(rightCount > 0){
+        sem_post(&mutex1);
+        sem_wait(&leftQ);
+    }else{
+        sem_post(&mutex1);
     }
 
-    sem_wait(&bridge);
-    leftCount += 1;
+    //Let it take on the bridge
+    sem_wait(&bridge);      
 
-    passing(1, *(int*) args);
-    
-    sem_post(&bridge);
+    passing(1);
+
     leftCount -= 1;
+    sem_post(&bridge);
+
+    //if there are cars left in the queue then you wake them up or else you just leave it as it is
+    if(rightCount > 0 && leftCount == 0){
+        for(int i = 0; i < rightCount; i++){
+            sem_post(&rightQ); // waking up all of them  //no need for locks as we are waking all of them
+        }
+    }
+
 }
 
-
-
 int main(){
-    sem_init(&mutex, 0, 1);
+    sem_init(&mutex1, 0, 1);
+    sem_init(&mutex2, 0, 1);
     sem_init(&bridge, 0, 5);
+    sem_init(&leftQ, 0, 0); // queues for left
+    sem_init(&rightQ, 0, 0); // queues for right
+
 
     int leftNum, rightNum;
     printf("Enter the number of cars from left: ");
@@ -80,13 +103,13 @@ int main(){
     pthread_t threadsArrayLeft[leftNum];
     for(int i = 0; i < leftNum; i++){
         carID[i] = i;
-        pthread_create(&threadsArrayLeft[i], NULL, left, (void*) &carID[i]);
+        pthread_create(&threadsArrayLeft[i], NULL, left, NULL);
     }
     
     pthread_t threadsArrayRight[rightNum];
     for(int i = 0; i < rightNum; i++){
         carID[leftNum + i] = leftNum + i;
-        pthread_create(&threadsArrayRight[i], NULL, right, (void*) &carID[i + leftNum]);
+        pthread_create(&threadsArrayRight[i], NULL, right, NULL);
     }
 
     //joining threads
@@ -99,7 +122,7 @@ int main(){
     }
 
     sem_destroy(&bridge);
-    sem_destroy(&mutex);
+    sem_destroy(&mutex1);
 
     return 0;
 }
