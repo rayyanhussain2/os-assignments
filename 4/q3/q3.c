@@ -13,17 +13,17 @@ sem_t rightQ;
 int rightCount = 0;
 int leftCount = 0;
 
-void passing(_Bool isLeft){
+void passing(_Bool isLeft, int carID){
     if(isLeft){
-        printf("Car ID: %lld passing from the left...\n", (unsigned long long)pthread_self());
+        printf("Car ID: %d started crossing the bridge from the left...\n", carID);
         sleep(1);
-        printf("Car ID: %lld passed from the left!\n", (unsigned long long)pthread_self());
+        printf("Car ID: %d finished crossing the bridge from the left!\n", carID);
     }else{
-        printf("Car ID: %lld passing from the right...\n", (unsigned long long)pthread_self());
+        printf("Car ID: %d started crossing the bridge from the right...\n", carID);
         sleep(1);
-        printf("Car ID: %lld passed from the right!\n", (unsigned long long)pthread_self());
+        printf("Car ID: %d finished crossing the bridge from the right!\n", carID);
     }
-}
+}  
 
 //implement mutual exclusion
 void* right(void* args){
@@ -39,11 +39,13 @@ void* right(void* args){
     }
 
     //Let it take on the bridge
-    sem_wait(&bridge);      1
+    sem_wait(&bridge);      
 
-    passing(0);
+    passing(0, *(int*) args);
 
+    sem_wait(&mutex2);
     rightCount -= 1;
+    sem_post(&mutex2);
     sem_post(&bridge);
 
     //if there are cars left in the queue then you wake them up or else you just leave it as it is
@@ -57,21 +59,23 @@ void* right(void* args){
 void* left(void* args){
     //If there are cars on the bridge in the opposite direction, put to sleep
     //Count is h   ow many cars are there total in queue and on bridge
-    sem_wait(&mutex1);
+    sem_wait(&mutex2);
     leftCount += 1;
     if(rightCount > 0){
-        sem_post(&mutex1);
+        sem_post(&mutex2);
         sem_wait(&leftQ);
     }else{
-        sem_post(&mutex1);
+        sem_post(&mutex2);
     }
 
     //Let it take on the bridge
     sem_wait(&bridge);      
 
-    passing(1);
+    passing(1, *(int*) args);
 
+    sem_wait(&mutex2);
     leftCount -= 1;
+    sem_post(&mutex2);
     sem_post(&bridge);
 
     //if there are cars left in the queue then you wake them up or else you just leave it as it is
@@ -103,13 +107,13 @@ int main(){
     pthread_t threadsArrayLeft[leftNum];
     for(int i = 0; i < leftNum; i++){
         carID[i] = i;
-        pthread_create(&threadsArrayLeft[i], NULL, left, NULL);
+        pthread_create(&threadsArrayLeft[i], NULL, left, (void*) &carID[i]);
     }
     
     pthread_t threadsArrayRight[rightNum];
     for(int i = 0; i < rightNum; i++){
         carID[leftNum + i] = leftNum + i;
-        pthread_create(&threadsArrayRight[i], NULL, right, NULL);
+        pthread_create(&threadsArrayRight[i], NULL, right, (void*) &carID[leftNum + i]);
     }
 
     //joining threads
@@ -123,6 +127,9 @@ int main(){
 
     sem_destroy(&bridge);
     sem_destroy(&mutex1);
+    sem_destroy(&mutex2);
+    sem_destroy(&leftQ);
+    sem_destroy(&rightQ);
 
     return 0;
 }
