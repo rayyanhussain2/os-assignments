@@ -46,7 +46,7 @@ int main(int argc, char const *argv[])
     reallocating the space that will be fullfilled by the free list.
     */
    
-    printf("\n--------- Freeing up the memory [mems_free] --------\n");
+    printf("\n--------- Freeing up the memory [mems_free] --------\n"); 
     mems_free(ptr[3]);
     mems_print_stats();
     ptr[3] = (int*)mems_malloc(sizeof(int)*250);
