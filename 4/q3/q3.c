@@ -33,7 +33,10 @@ void* right(void* args){
     //and if we detect its a left one and wake that one up we just allow it
     //This is the same logic used here
     //If we dont put anything waiting and put both of them into the while loop, then theres no point of semaphores.
+    //Maybe use mutex to lock the bridge out of left and right. But then you will again be waiting only for the left or right ones
+
     while (leftCount != 0){
+
     }
 
     sem_wait(&bridge);      
