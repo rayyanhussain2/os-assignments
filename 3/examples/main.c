@@ -5,17 +5,17 @@
 int main(int argc, char const *argv[])
 {
     //initialise the MeMS system 
-    mems_init();
-    printf("Initialising MeMs...\n");
+    printf("Initialising MeMS...\n");
 
     int* ptr[10];
 
     /*
-    This allocates 10 arrays of 250 integers each - it does not
+    This allocates 10 arrays of 250 integers each
     */
     printf("\n------- Allocated virtual addresses [mems_malloc] -------\n");
+    
     for(int i=0;i<10;i++){
-        ptr[i] = (int*)mems_malloc(sizeof(int)*250); //Taking some random number and conveting it into an address and storing that in an array
+        ptr[i] = (int*) mems_malloc(sizeof(int)*250); //Taking some random number and conveting it into an address and storing that in an array
         printf("Virtual address: %lu\n", (unsigned long)ptr[i]);
     }
 
@@ -29,10 +29,10 @@ int main(int argc, char const *argv[])
     */    
     printf("\n------ Assigning value to Virtual address [mems_get] -----\n");
     // how to write to the virtual address of the MeMS (this is given to show that the system works on arrays as well)
-    int* phy_ptr= (int*) mems_get(&ptr[0][1]); // get the address of index 1
+    int* phy_ptr= (int*) &ptr[0][1]; // get the address of index 1
     phy_ptr[0]=200; // put value at index 1
-    int* phy_ptr2= (int*) mems_get(&ptr[0][0]); // get the address of index 0
-    printf("Virtual address: %lu\tPhysical Address: %lu\n",(unsigned long)ptr[0],(unsigned long)phy_ptr2);
+    int* phy_ptr2= (int*) &ptr[0][0]; // get the address of index 0
+    printf("Virtual address: %lu\n",(unsigned long)ptr[0]);
     printf("Value written: %d\n", phy_ptr2[1]); // print the address of index 1 */
 
     /*
@@ -47,12 +47,23 @@ int main(int argc, char const *argv[])
     */
    
     printf("\n--------- Freeing up the memory [mems_free] --------\n"); 
-    mems_free(ptr[3]);
+    printf("Freeing Up Pointer 1\n");
+    mems_free(ptr[1]);    
     mems_print_stats();
-    ptr[3] = (int*)mems_malloc(sizeof(int)*250);
+    
+    printf("Freeing Up Pointer 2\n");
+    mems_free(ptr[2]);    
     mems_print_stats();
 
-    mems_finish();
+    printf("Allocating in Pointer 1\n");
+    ptr[1] = (int*)mems_malloc(sizeof(int)*375);
+    mems_print_stats();
+
+    printf("Freeing All Memory...\n");
+    for(int i=0;i<10;i++){
+        mems_free(ptr[i]); //Will throw invalid for ptr2
+    }
+    mems_print_stats();
 
     return 0;
 }

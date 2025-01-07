@@ -1,8 +1,8 @@
 # this is makefile for MeMS
-all: clean example 
+all: example 
 
 example:
-	gcc -o example src/example.c
+	gcc -o example examples/main.c src/mems.c
 
 clean:
 	rm -rf example
